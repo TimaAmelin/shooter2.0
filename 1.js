@@ -193,9 +193,9 @@ class Monster {
             (
                 rooms.isInRoom5(this.x, this.y) &&
                 (
-                    rooms.isInRoom3(player.x, player.y) ||
+                    rooms.isInRoom5(player.x, player.y) ||
                     rooms.isOnBridge4(player.x, player.y) ||
-                    rooms.isOnBridge5(player.x, player.y)
+                    rooms.isOnBridge3(player.x, player.y)
                 )
             ) ||
             (
