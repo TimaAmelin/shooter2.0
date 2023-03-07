@@ -585,38 +585,63 @@ class BuffPlacer {
                 bottom: 3202
             }
         ];
-        this.heal = () => {
-            player.hp += 25;
-            if (player.hp > 100) {
-                player.hp = 100;
-            };
-        };
-        this.bullet = () => player.damage += 5;
-        this.ammo = () => {
-            player.ammo += 2;
-            player.maxAmmo += 2;
-        };
-        this.speed = () => {
-            if (player.vSpeed < 8) {
-                player.vSpeed *= 1.1;
-                player.hSpeed *= 1.1;
-            }
-        };
     };
+
+    heal() {
+        player.hp += 25;
+        if (player.hp > 100) {
+            player.hp = 100;
+        };
+    }
+
+    bullet () {
+        player.damage += 10;
+        bullet.speed *= 1.1;
+    }
+
+    ammo () {
+        player.ammo += 2;
+        player.maxAmmo += 2;
+    }
+
+    speed () {
+        if (player.vSpeed < 8) {
+            player.vSpeed *= 1.1;
+            player.hSpeed *= 1.1;
+        };
+    }
+
+    clear () {
+        monsterSummoner.monsters = [];
+    }
 
     place (player) {
         if (this.timer > 0) {
             this.timer--;
         } else  if (this.timer != -1) {
             const coords = this.generateCoords(player);
-            const buffCoefficient = Math.random();
-            const buffType = buffCoefficient > 0.7 ?
-                                'ammo' :
-                                buffCoefficient > 0.4 ?
-                                    'heal' :
-                                    buffCoefficient > 0.2 ?
-                                        'bullet' :
-                                        'speed';
+            const buffArray = [];
+            for (let i = 0; i < 10; i++) {
+                buffArray.push('ammo');
+            };
+            for (let i = 0; i < 7; i++) {
+                buffArray.push('heal');
+            };
+            if (player.score > 20 && player.vSpeed < 8) {
+                for (let i = 0; i < 3; i++) {
+                    buffArray.push('speed');
+                };
+            };
+            if (player.score > 50) {
+                for (let i = 0; i < 3; i++) {
+                    buffArray.push('bullet');
+                };
+            }
+            if (player.score > 100) {
+                buffArray.push('clear');
+            };
+            const buffCoefficient = Math.floor(Math.random() * buffArray.length);
+            const buffType = buffArray[buffCoefficient];
             const buff = new Buff(
                 coords.x,
                 coords.y,
@@ -627,7 +652,9 @@ class BuffPlacer {
                         this.heal :
                         buffType === 'ammo' ?
                             this.ammo :
-                            this.speed
+                            buffType === 'clear' ?
+                                this.clear :
+                                this.speed
             );
             this.buffs.push(buff);
             this.timer = 20 + 400 / (player.score / 50 + 1);
@@ -787,8 +814,14 @@ const gameLoop = () => {
         context.fillStyle = 'white';
         context.fillRect(0, 0, 800, 600);
         context.fillStyle = 'black';
+        context.font = 'Bold 40px Arial';
+        context.fillText('You are a tasty cheesy toast...', 120, 100);
+        context.fillText('...in a field full of monsters!', 155, 150);
+        context.font = 'Bold 30px Arial';
+        context.fillText("Don't let them get to your cheese!", 160, 230);
+        context.fillText('Move - "AWSD"   Shoot - "Mouse"   Reload - "R"', 70, 310);
         context.font = 'Bold 50px Arial';
-        context.fillText('Click  to start', 240, 200);
+        context.fillText('Press Enter to start', 170, 450);
         context.drawImage(cursor.image, cursor.x, cursor.y);
     };
 };
@@ -865,6 +898,28 @@ window.onload = () => {
             playing = true;
             pause = false;
         }
+        if (!playing & e.keyCode === 13) {
+            player.x = 1000;
+            player.y = 1000;
+            player.hp = 100;
+            player.score = 0;
+            player.vSpeed = 4;
+            player.hSpeed = 5;
+            player.bulletSkin = document.getElementById('bullet');
+            player.bulletIncX = 42;
+            player.bulletIncY = 67;
+            player.ammo = 10;
+            player.maxAmmo = 10;
+            player.canShoot = true;
+
+            cheatCode = [76, 79, 79, 67, 77, 73, 84];
+            
+            monsterSummoner.monsters = [];
+            buffPlacer.buffs = [];
+            bullets = [];
+
+            playing = true;
+        }
     };
 
     window.onkeyup = e => {
@@ -910,28 +965,7 @@ window.onload = () => {
                     }
                 };
             };
-        } else {
-            player.x = 1000;
-            player.y = 1000;
-            player.hp = 100;
-            player.score = 0;
-            player.vSpeed = 4;
-            player.hSpeed = 5;
-            player.bulletSkin = document.getElementById('bullet');
-            player.bulletIncX = 42;
-            player.bulletIncY = 67;
-            player.ammo = 10;
-            player.maxAmmo = 10;
-            player.canShoot = true;
-
-            cheatCode = [76, 79, 79, 67, 77, 73, 84];
-            
-            monsterSummoner.monsters = [];
-            buffPlacer.buffs = [];
-            bullets = [];
-
-            playing = true;
-        };
+        }
     };
 };
 
